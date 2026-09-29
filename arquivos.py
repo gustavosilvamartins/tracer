@@ -200,3 +200,57 @@ def ler_historico():
     except FileNotFoundError:
         pass  # nenhuma partida registrada ainda
     return partidas
+
+
+# ---------- Ranking (versão 1.2) ----------
+
+def criterio_ranking(partida):
+    """Ordena pelo menor tempo; em caso de empate, pelo menor número de jogadas."""
+    return (partida["tempo"], partida["jogadas"])
+
+
+def partidas_completas():
+    """Partidas que fizeram os 10 níveis começando do 1 (as únicas comparáveis no ranking)."""
+    completas = []
+    for partida in ler_historico():
+        if len(partida["tempos"]) == mecanica.total_niveis():
+            completas.append(partida)
+    return completas
+
+
+def ranking_geral(limite=10):
+    """As partidas completas mais rápidas, da primeira à última colocada."""
+    return sorted(partidas_completas(), key=criterio_ranking)[:limite]
+
+
+def posicao_no_ranking(estado):
+    """
+    Colocação da partida que acabou de ser registrada, ou None se ela não
+    começou no nível 1 (e por isso não entra no ranking).
+    """
+    if len(estado["tempos"]) != mecanica.total_niveis():
+        return None
+    minha = (int(estado["tempo_total"]), estado["jogadas_total"])
+    melhores = 0
+    for partida in partidas_completas():
+        if criterio_ranking(partida) < minha:
+            melhores += 1
+    return melhores + 1
+
+
+def recordes_por_nivel():
+    """
+    Melhor tempo já feito em cada nível, considerando todas as partidas do histórico.
+    Devolve uma lista com um dicionário por nível (ou None se o nível nunca foi completado).
+    """
+    recordes = []
+    for i in range(mecanica.total_niveis()):
+        recordes.append(None)
+    for partida in ler_historico():
+        primeiro = partida["niveis"] - len(partida["tempos"])
+        for i in range(len(partida["tempos"])):
+            nivel = primeiro + i
+            tempo = partida["tempos"][i]
+            if recordes[nivel] is None or tempo < recordes[nivel]["tempo"]:
+                recordes[nivel] = {"nome": partida["nome"], "tempo": tempo, "data": partida["data"]}
+    return recordes

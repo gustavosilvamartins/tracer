@@ -76,7 +76,12 @@ def main(args=sys.argv):
     argumentos = ler_argumentos(parser, args)
 
     # Configurações do jogo, que também podem ser mudadas no menu (regra 3.2.1.4)
-    config = {"nivel": argumentos.nivel - 1, "autosave": argumentos.autosave}
+    config = {"nivel": argumentos.nivel - 1, "autosave": argumentos.autosave,
+              # Partes do jogo em interface gráfica (seção 6); -gui já liga todas
+              "gui": {"principal": argumentos.gui_principal,
+                      "pause": argumentos.gui_pause,
+                      "arquivos": argumentos.gui_arquivos,
+                      "jogo": argumentos.gui_jogo}}
 
     acao = "menu"
     if argumentos.carregar is not None:
